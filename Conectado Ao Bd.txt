@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barbearia Lilico - Agendamentos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #000000, #1a1a1a, #333333);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 0 3px #d4af37;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 30%, rgba(212, 175, 55, 0.1), transparent);
+            border-radius: 50%;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #d4af37;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            z-index: 1;
+        }
+
+        .scissors {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 20px;
+            transform: rotate(45deg);
+            z-index: 1;
+            color: #d4af37;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #d4af37, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #ccc;
+            margin-bottom: 30px;
+        }
+
+        .firebase-status {
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .firebase-status.connected {
+            color: #00ff88;
+            border-color: rgba(0, 255, 0, 0.3);
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        .firebase-status.error {
+            color: #ff6b6b;
+            border-color: rgba(255, 0, 0, 0.3);
+            background: rgba(255, 0, 0, 0.1);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .services, .booking-form {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .services h2, .booking-form h2 {
+            color: #d4af37;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .service-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .service-item:hover {
+            padding-left: 10px;
+            color: #d4af37;
+        }
+
+        .service-name {
+            font-weight: bold;
+        }
+
+        .service-price {
+            color: #d4af37;
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #d4af37;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            font-size: 16px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .form-group select {
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+        }
+
+        .form-group select option {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 10px;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .form-group input::placeholder, .form-group textarea::placeholder {
+            color: #aaa;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #d4af37, #ffd700);
+            color: #1a1a1a;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .time-slot {
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            color: #fff;
+        }
+
+        .time-slot:hover {
+            background: rgba(212, 175, 55, 0.2);
+        }
+
+        .time-slot.selected {
+            background: linear-gradient(45deg, #d4af37, #ffd700);
+            color: #1a1a1a;
+            font-weight: bold;
+        }
+
+        .time-slot.unavailable {
+            opacity: 0.3;
+            cursor: not-allowed;
+            background: rgba(255, 0, 0, 0.2);
+        }
+
+        .success-message, .error-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .success-message {
+            background: rgba(0, 255, 0, 0.2);
+            color: #00ff88;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+        }
+
+        .error-message {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            text-align: center;
+            color: #d4af37;
+            padding: 20px;
+            font-size: 16px;
+        }
+
+        /* Admin styles */
+        .admin-btn {
+            background: rgba(0, 0, 0, 0.8);
+            color: #d4af37;
+            border: 1px solid #d4af37;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .admin-btn:hover {
+            background: #d4af37;
+            color: #000;
+        }
+
+        .admin-area {
+            width: 100%;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        .admin-header h2 {
+            color: #d4af37;
+            margin: 0;
+        }
+
+        .back-btn {
+            background: rgba(212, 175, 55, 0.2);
+            color: #d4af37;
+            border: 1px solid #d4af37;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #d4af37;
+            color: #000;
+        }
+
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .login-content {
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            min-width: 350px;
+            text-align: center;
+        }
+
+        .login-content h3 {
+            color: #d4af37;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+        }
+
+        .cancel-btn {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff6b6b;
+            padding: 12px 25px;
+            border: 1px solid #ff6b6b;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            margin-left: 10px;
+        }
+
+        .cancel-btn:hover {
+            background: #ff6b6b;
+            color: #000;
+        }
+
+        .dashboard {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(45deg, #d4af37, #ffd700);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(212, 175, 55, 0.2);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #d4af37;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+
+        .appointments-list {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .appointments-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .period-tabs {
+            display: flex;
+            gap: 10px;
+        }
+
+        .tab-btn {
+            background: rgba(0, 0, 0, 0.4);
+            color: #ccc;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .tab-btn:hover {
+            background: rgba(212, 175, 55, 0.2);
+            color: #d4af37;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(45deg, #d4af37, #ffd700);
+            color: #1a1a1a;
+            font-weight: bold;
+        }
+
+        .appointment-item {
+            background: rgba(212, 175, 55, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #d4af37;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .delete-btn {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff6b6b;
+            border: 1px solid #ff6b6b;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: #ff6b6b;
+            color: #000;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .logo {
+                width: 80px;
+                height: 80px;
+            }
+
+            .logo-text {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-text">LILICO</div>
+                <div class="scissors">✂️</div>
+            </div>
+            <h1>Barbearia Lilico</h1>
+            <p class="subtitle">Estilo e tradição em cada corte</p>
+            
+            <div id="firebaseStatus" class="firebase-status">
+                Conectando ao Firebase...
+            </div>
+            
+            <button id="adminBtn" class="admin-btn">🔐 Painel Admin</button>
+        </header>
+
+        <div class="main-content" id="clientArea">
+            <div class="services">
+                <h2>📋 Nossos Serviços</h2>
+                <div class="service-item">
+                    <div class="service-name">Corte Masculino</div>
+                    <div class="service-price">R$ 25,00</div>
+                </div>
+                <div class="service-item">
+                    <div class="service-name">Barba</div>
+                    <div class="service-price">R$ 15,00</div>
+                </div>
+                <div class="service-item">
+                    <div class="service-name">Corte + Barba</div>
+                    <div class="service-price">R$ 35,00</div>
+                </div>
+                <div class="service-item">
+                    <div class="service-name">Sobrancelha</div>
+                    <div class="service-price">R$ 10,00</div>
+                </div>
+                <div class="service-item">
+                    <div class="service-name">Relaxamento</div>
+                    <div class="service-price">R$ 30,00</div>
+                </div>
+                <div class="service-item">
+                    <div class="service-name">Hidratação</div>
+                    <div class="service-price">R$ 20,00</div>
+                </div>
+            </div>
+
+            <div class="booking-form">
+                <h2>📅 Agendar Horário</h2>
+                <div id="successMessage" class="success-message hidden"></div>
+                <div id="errorMessage" class="error-message hidden"></div>
+                
+                <form id="bookingForm">
+                    <div class="form-group">
+                        <label for="clientName">Nome Completo</label>
+                        <input type="text" id="clientName" required placeholder="Seu nome completo">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clientPhone">WhatsApp</label>
+                        <input type="tel" id="clientPhone" required placeholder="(xx) xxxxx-xxxx">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="service">Serviço</label>
+                        <select id="service" required>
+                            <option value="">Selecione o serviço</option>
+                            <option value="Corte Masculino">Corte Masculino - R$ 25,00</option>
+                            <option value="Barba">Barba - R$ 15,00</option>
+                            <option value="Corte + Barba">Corte + Barba - R$ 35,00</option>
+                            <option value="Sobrancelha">Sobrancelha - R$ 10,00</option>
+                            <option value="Relaxamento">Relaxamento - R$ 30,00</option>
+                            <option value="Hidratação">Hidratação - R$ 20,00</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="date">Data</label>
+                        <input type="date" id="date" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Horário Disponível</label>
+                        <div id="timeSlotsLoading" class="loading hidden">Carregando horários...</div>
+                        <div class="time-slots" id="timeSlots"></div>
+                        <input type="hidden" id="selectedTime">
+                    </div>
+                    
+                    <button type="submit" class="btn" id="submitBtn">📱 Confirmar Agendamento</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Admin Area -->
+        <div class="admin-area hidden" id="adminArea">
+            <div class="login-modal" id="loginModal">
+                <div class="login-content">
+                    <h3>🔐 Acesso Administrativo</h3>
+                    <div class="form-group">
+                        <label for="adminPassword">Digite a senha:</label>
+                        <input type="password" id="adminPassword" placeholder="••••">
+                    </div>
+                    <button id="loginBtn" class="btn">Entrar</button>
+                    <button id="cancelLoginBtn" class="cancel-btn">Cancelar</button>
+                    <div id="loginError" class="error-message hidden">Senha incorreta!</div>
+                </div>
+            </div>
+
+            <div class="admin-content hidden" id="adminContent">
+                <div class="admin-header">
+                    <h2>🔐 Painel Administrativo</h2>
+                    <button id="backToClient" class="back-btn">← Voltar para Área do Cliente</button>
+                </div>
+                
+                <div class="dashboard">
+                    <h2>📊 Dashboard - Hoje</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">📊</div>
+                            <div class="stat-number" id="totalAppointmentsToday">0</div>
+                            <div class="stat-label">Agendamentos Hoje</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">💰</div>
+                            <div class="stat-number" id="totalRevenueToday">R$ 0</div>
+                            <div class="stat-label">Faturamento Hoje</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🕐</div>
+                            <div class="stat-number" id="nextAppointment">--:--</div>
+                            <div class="stat-label">Próximo Cliente</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-number" id="totalClients">0</div>
+                            <div class="stat-label">Total Clientes</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="appointments-list">
+                    <div class="appointments-header">
+                        <h2>📋 Agendamentos</h2>
+                        <div class="period-tabs">
+                            <button class="tab-btn active" data-period="today">Hoje</button>
+                            <button class="tab-btn" data-period="week">Semana</button>
+                            <button class="tab-btn" data-period="all">Todos</button>
+                        </div>
+                    </div>
+                    
+                    <div class="appointments-content">
+                        <div id="appointmentsDisplay">
+                            <div class="loading">Carregando agendamentos...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Firebase Configuration - AGORA INTEGRADO
+        const firebaseConfig = {
+            apiKey: "AIzaSyAifrR8rJaaUwAm7YNQgZitD1F-uWNbdIU",
+            authDomain: "barbearia-9b868.firebaseapp.com",
+            projectId: "barbearia-9b868",
+            storageBucket: "barbearia-9b868.firebasestorage.app",
+            messagingSenderId: "727042836855",
+            appId: "1:727042836855:web:541a62a9ee2d8854d6b972",
+            measurementId: "G-KBZKV55V8J"
+        };
+
+        // Global variables
+        let db = null;
+        let isFirebaseReady = false;
+        let isLoggedIn = false;
+        let currentPeriod = 'today';
+        
+        const servicePrices = {
+            'Corte Masculino': 25,
+            'Barba': 15,
+            'Corte + Barba': 35,
+            'Sobrancelha': 10,
+            'Relaxamento': 30,
+            'Hidratação': 20
+        };
+        
+        const availableSlots = [
+            '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
+            '11:00', '11:30', '14:00', '14:30', '15:00', '15:30',
+            '16:00', '16:30', '17:00', '17:30', '18:00', '18:30'
+        ];
+
+        // Initialize Firebase
+        function initializeFirebase() {
+            try {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                testFirebaseConnection();
+            } catch (error) {
+                console.error('Erro ao inicializar Firebase:', error);
+                showFirebaseStatus('❌ Erro na configuração do Firebase', 'error');
+            }
+        }
+
+        // Test Firebase connection
+        function testFirebaseConnection() {
+            showFirebaseStatus('Testando conexão...', '');
+            
+            db.collection('appointments').limit(1).get()
+                .then(() => {
+                    isFirebaseReady = true;
+                    showFirebaseStatus('✅ Conectado ao Firebase - Dados sincronizados na nuvem', 'connected');
+                    initializeApp();
+                })
+                .catch((error) => {
+                    console.error('Erro ao conectar com Firebase:', error);
+                    if (error.code === 'permission-denied') {
+                        showFirebaseStatus('❌ Erro: Configure as regras do Firestore para permitir leitura/escrita', 'error');
+                    } else {
+                        showFirebaseStatus('❌ Erro de conexão com Firebase', 'error');
+                    }
+                });
+        }
+
+        // Show Firebase status
+        function showFirebaseStatus(message, type) {
+            const statusEl = document.getElementById('firebaseStatus');
+            statusEl.textContent = message;
+            statusEl.className = `firebase-status ${type}`;
+        }
+
+        // Initialize app
+        function initializeApp() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').min = today;
+            document.getElementById('date').value = today;
+
+            generateTimeSlots(today);
+            setupEventListeners();
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            document.getElementById('date').addEventListener('change', function() {
+                generateTimeSlots(this.value);
+                document.getElementById('selectedTime').value = '';
+            });
+
+            document.getElementById('bookingForm').addEventListener('submit', handleFormSubmit);
+
+            // Phone mask
+            document.getElementById('clientPhone').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length >= 11) {
+                    value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+                } else if (value.length >= 7) {
+                    value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+                } else if (value.length >= 3) {
+                    value = value.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+                }
+                e.target.value = value;
+            });
+
+            // Admin controls
+            document.getElementById('adminBtn').addEventListener('click', handleAdminAccess);
+            document.getElementById('backToClient').addEventListener('click', showClientArea);
+            document.getElementById('loginBtn').addEventListener('click', handleLogin);
+            document.getElementById('cancelLoginBtn').addEventListener('click', showClientArea);
+            document.getElementById('adminPassword').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') handleLogin();
+            });
+
+            // Period tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentPeriod = this.dataset.period;
+                    displayAppointmentsByPeriod(currentPeriod);
+                });
+            });
+        }
+
+        // Generate time slots with Firebase data
+        async function generateTimeSlots(selectedDate) {
+            const timeSlotsContainer = document.getElementById('timeSlots');
+            const loadingEl = document.getElementById('timeSlotsLoading');
+            
+            timeSlotsContainer.style.
